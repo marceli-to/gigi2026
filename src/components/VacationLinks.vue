@@ -144,12 +144,12 @@ onMounted(() => {
     <Dialog v-model:open="showAddDialog">
       <DialogTrigger as-child>
         <Button class="w-full" size="lg">
-          Add Vacation Home
+          Add entry
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Vacation Home</DialogTitle>
+          <DialogTitle>Add entry</DialogTitle>
         </DialogHeader>
         <div class="space-y-4 py-4">
           <div class="flex flex-col space-y-2">
