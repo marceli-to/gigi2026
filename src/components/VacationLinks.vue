@@ -140,17 +140,6 @@ onMounted(() => {
       </DialogContent>
     </Dialog>
 
-    <!-- User Display and Change Button -->
-    <div v-if="userName" class="flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <span class="text-sm text-muted-foreground">Logged in as:</span>
-        <Badge variant="secondary" class="text-base">{{ userName }}</Badge>
-      </div>
-      <Button @click="showUserDialog = true" variant="outline" size="sm">
-        Change User
-      </Button>
-    </div>
-
     <!-- Add Link Button -->
     <Dialog v-model:open="showAddDialog">
       <DialogTrigger as-child>
