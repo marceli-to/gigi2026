@@ -6,13 +6,16 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '@/components/ui/dialog'
 
 const links = ref([])
-const userName = ref('Marcel')
+const userName = ref('')
 const newLinkUrl = ref('')
 const newLinkTitle = ref('')
 const loading = ref(false)
 const error = ref('')
+const showAddDialog = ref(false)
+const showUserDialog = ref(false)
 
 // API URL - relative path works in production since api.php is copied to dist/
 // For development, run: php -S localhost:5173 -t .
@@ -55,11 +58,18 @@ const addLink = async () => {
     links.value = data.links
     newLinkUrl.value = ''
     newLinkTitle.value = ''
+    showAddDialog.value = false
   } catch (e) {
     alert('Failed to add link.')
   } finally {
     loading.value = false
   }
+}
+
+const selectUser = (user) => {
+  userName.value = user
+  showUserDialog.value = false
+  fetchLinks()
 }
 
 const vote = async (linkId, type) => {
@@ -87,65 +97,103 @@ const vote = async (linkId, type) => {
 }
 
 onMounted(() => {
-  fetchLinks()
+  // Show user selection dialog if no user is selected
+  if (!userName.value) {
+    showUserDialog.value = true
+  } else {
+    fetchLinks()
+  }
 })
 </script>
 
 <template>
   <div class="space-y-6">
-    <!-- User Name Select -->
-    <Card>
-      <CardHeader>
-        <CardTitle>User</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Select v-model="userName">
-          <SelectTrigger class="w-full sm:flex-grow">
-            <SelectValue placeholder="Select your name" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Marcel">Marcel</SelectItem>
-            <SelectItem value="Balint">Balint</SelectItem>
-            <SelectItem value="Raphael">Raphael</SelectItem>
-          </SelectContent>
-        </Select>
-      </CardContent>
-    </Card>
+    <!-- User Selection Modal -->
+    <Dialog v-model:open="showUserDialog">
+      <DialogContent :can-close="false">
+        <DialogHeader>
+          <DialogTitle>Select Your Name</DialogTitle>
+        </DialogHeader>
+        <div class="space-y-3 py-4">
+          <Button
+            @click="selectUser('Marcel')"
+            variant="outline"
+            class="w-full justify-start text-lg py-6"
+          >
+            Marcel
+          </Button>
+          <Button
+            @click="selectUser('Balint')"
+            variant="outline"
+            class="w-full justify-start text-lg py-6"
+          >
+            Balint
+          </Button>
+          <Button
+            @click="selectUser('Raphael')"
+            variant="outline"
+            class="w-full justify-start text-lg py-6"
+          >
+            Raphael
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
 
-    <!-- Add Link Form -->
-    <Card>
-      <CardHeader>
-        <CardTitle>Add</CardTitle>
-      </CardHeader>
-      <CardContent class="space-y-4">
-        <div class="flex flex-col space-y-2">
-          <Label for="link-url">Link</Label>
-          <Input
-            id="link-url"
-            v-model="newLinkUrl"
-            type="url"
-            placeholder="https://..."
-          />
-        </div>
-        <div class="flex flex-col space-y-2">
-          <Label for="location">Location</Label>
-          <Input
-            id="location"
-            v-model="newLinkTitle"
-            type="text"
-            placeholder="e.g., Saas Fee"
-            @keyup.enter="addLink"
-          />
-        </div>
-        <Button
-          @click="addLink"
-          :disabled="loading || !newLinkUrl || !userName"
-          class="w-full sm:w-auto sm:ml-auto sm:flex"
-        >
-          Add
+    <!-- User Display and Change Button -->
+    <div v-if="userName" class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-sm text-muted-foreground">Logged in as:</span>
+        <Badge variant="secondary" class="text-base">{{ userName }}</Badge>
+      </div>
+      <Button @click="showUserDialog = true" variant="outline" size="sm">
+        Change User
+      </Button>
+    </div>
+
+    <!-- Add Link Button -->
+    <Dialog v-model:open="showAddDialog">
+      <DialogTrigger as-child>
+        <Button class="w-full" size="lg">
+          Add Vacation Home
         </Button>
-      </CardContent>
-    </Card>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Vacation Home</DialogTitle>
+        </DialogHeader>
+        <div class="space-y-4 py-4">
+          <div class="flex flex-col space-y-2">
+            <Label for="link-url">Link</Label>
+            <Input
+              id="link-url"
+              v-model="newLinkUrl"
+              type="url"
+              placeholder="https://..."
+            />
+          </div>
+          <div class="flex flex-col space-y-2">
+            <Label for="location">Location</Label>
+            <Input
+              id="location"
+              v-model="newLinkTitle"
+              type="text"
+              placeholder="e.g., Saas Fee"
+              @keyup.enter="addLink"
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button
+            @click="addLink"
+            :disabled="loading || !newLinkUrl || !userName"
+            class="w-full"
+          >
+            Add
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
 
     <!-- Links List -->
     <div v-if="loading" class="text-center text-muted-foreground animate-pulse">Loading links...</div>
