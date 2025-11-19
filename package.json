@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && cp api.php data.json dist/",
+    "build": "vite build && cp api.php dist/",
     "preview": "vite preview"
   },
   "dependencies": {
