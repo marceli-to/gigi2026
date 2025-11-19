@@ -14,10 +14,9 @@ const newLinkTitle = ref('')
 const loading = ref(false)
 const error = ref('')
 
-// API URL - assume same host if deployed, but for dev we might need localhost:8000
-// If we use relative path '/api.php', we need to proxy it in vite config or serve the built files with PHP.
-// For simplicity in dev:
-const API_URL = 'http://localhost:8000/api.php'
+// API URL - relative path works in production since api.php is copied to dist/
+// For development, run: php -S localhost:5173 -t .
+const API_URL = '/api.php'
 
 const fetchLinks = async () => {
   loading.value = true
