@@ -1,5 +1,11 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
 
 const links = ref([])
 const userName = ref('Marcel')
@@ -89,84 +95,103 @@ onMounted(() => {
 <template>
   <div class="space-y-6">
     <!-- User Name Select -->
-    <div class="bg-white p-4 rounded-lg shadow flex flex-col sm:flex-row items-start sm:items-center gap-4">
-      <label class="font-medium text-gray-700 whitespace-nowrap">Name</label>
-      <select 
-        v-model="userName" 
-        class="border border-gray-300 rounded px-1 py-2 w-full sm:w-auto sm:flex-grow focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-      >
-        <option value="Marcel">Marcel</option>
-        <option value="Balint">Balint</option>
-        <option value="Raphael">Raphael</option>
-      </select>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>User</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Select v-model="userName">
+          <SelectTrigger class="w-full sm:flex-grow">
+            <SelectValue placeholder="Select your name" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Marcel">Marcel</SelectItem>
+            <SelectItem value="Balint">Balint</SelectItem>
+            <SelectItem value="Raphael">Raphael</SelectItem>
+          </SelectContent>
+        </Select>
+      </CardContent>
+    </Card>
 
     <!-- Add Link Form -->
-    <div class="bg-white p-4 rounded-lg shadow">
-      <h2 class="text-lg font-semibold mb-4">Add</h2>
-      <div class="flex flex-col gap-3">
-        <input 
-          v-model="newLinkUrl" 
-          type="url" 
-          placeholder="Link" 
-          class="border border-gray-300 rounded px-3 py-2 flex-grow focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-        <div class="flex flex-col sm:flex-row gap-3">
-             <input 
-              v-model="newLinkTitle" 
-              type="text" 
-              placeholder="Location" 
-              class="border border-gray-300 rounded px-3 py-2 flex-grow focus:outline-none focus:ring-2 focus:ring-blue-500"
-              @keyup.enter="addLink"
-            >
+    <Card>
+      <CardHeader>
+        <CardTitle>Add</CardTitle>
+      </CardHeader>
+      <CardContent class="space-y-4">
+        <div class="flex flex-col space-y-2">
+          <Label for="link-url">Link</Label>
+          <Input
+            id="link-url"
+            v-model="newLinkUrl"
+            type="url"
+            placeholder="https://..."
+          />
         </div>
-        <button 
-          @click="addLink" 
-          class="bg-gray-800 text-white px-4 py-2 rounded hover:bg-black cursor-pointer disabled:opacity-50 transition self-end sm:self-auto w-full sm:w-auto"
+        <div class="flex flex-col space-y-2">
+          <Label for="location">Location</Label>
+          <Input
+            id="location"
+            v-model="newLinkTitle"
+            type="text"
+            placeholder="e.g., Saas Fee"
+            @keyup.enter="addLink"
+          />
+        </div>
+        <Button
+          @click="addLink"
           :disabled="loading || !newLinkUrl || !userName"
+          class="w-full sm:w-auto sm:ml-auto sm:flex"
         >
           Add
-        </button>
-      </div>
-    </div>
+        </Button>
+      </CardContent>
+    </Card>
 
     <!-- Links List -->
-    <div v-if="loading" class="text-center text-gray-500 animate-pulse">Loading links...</div>
+    <div v-if="loading" class="text-center text-muted-foreground animate-pulse">Loading links...</div>
     <div v-else class="space-y-4">
-      <div v-for="link in links" :key="link.id" class="bg-white p-4 rounded-lg shadow flex flex-col sm:flex-row justify-between items-start gap-4 hover:shadow-md transition">
-        
-        <!-- Image -->
-        <div v-if="link.image" class="w-full sm:w-48 h-32 shrink-0 rounded-md overflow-hidden bg-gray-100">
-            <img :src="link.image" alt="Property Image" class="w-full h-full object-cover">
-        </div>
+      <Card v-for="link in links" :key="link.id" class="hover:shadow-md transition-shadow">
+        <CardContent class="p-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
 
-        <div class="overflow-hidden max-w-full w-full">
-          <a :href="link.url" target="_blank" class="text-gray-800 hover:underline font-bold text-xl block leading-tight">
-            {{ link.title || link.url }}
-          </a>
-          <div class="text-sm text-gray-500 mt-2 flex items-center gap-2">
-            <span class="bg-gray-100 px-2 py-0.5 rounded text-gray-600 text-xs">Added by {{ link.added_by }}</span>
+            <!-- Image -->
+            <div v-if="link.image" class="w-full sm:w-48 h-32 shrink-0 rounded-md overflow-hidden bg-muted">
+              <img :src="link.image" alt="Property Image" class="w-full h-full object-cover">
+            </div>
+
+            <div class="overflow-hidden max-w-full w-full">
+              <a :href="link.url" target="_blank" class="text-foreground hover:underline font-bold text-xl block leading-tight">
+                {{ link.title || link.url }}
+              </a>
+              <div class="text-sm text-muted-foreground mt-2 flex items-center gap-2">
+                <Badge variant="secondary">Added by {{ link.added_by }}</Badge>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-6 shrink-0 w-full sm:w-auto justify-end self-center">
+              <div class="flex flex-col items-center group cursor-pointer" @click="vote(link.id, 'up')">
+                <button class="p-2 rounded-full group-hover:bg-green-50 text-muted-foreground group-hover:text-green-600 transition transform group-active:scale-90">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg>
+                </button>
+                <span class="font-bold text-green-700 text-sm">{{ link.upvotes }}</span>
+              </div>
+              <div class="flex flex-col items-center group cursor-pointer" @click="vote(link.id, 'down')">
+                <button class="p-2 rounded-full group-hover:bg-red-50 text-muted-foreground group-hover:text-red-600 transition transform group-active:scale-90">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z"/></svg>
+                </button>
+                <span class="font-bold text-red-700 text-sm">{{ link.downvotes }}</span>
+              </div>
+            </div>
           </div>
-        </div>
-        
-        <div class="flex items-center gap-6 shrink-0 w-full sm:w-auto justify-end self-center">
-          <div class="flex flex-col items-center group cursor-pointer" @click="vote(link.id, 'up')">
-             <button class="p-2 rounded-full group-hover:bg-green-50 text-gray-400 group-hover:text-green-600 transition transform group-active:scale-90">
-               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg>
-             </button>
-             <span class="font-bold text-green-700 text-sm">{{ link.upvotes }}</span>
-          </div>
-          <div class="flex flex-col items-center group cursor-pointer" @click="vote(link.id, 'down')">
-             <button class="p-2 rounded-full group-hover:bg-red-50 text-gray-400 group-hover:text-red-600 transition transform group-active:scale-90">
-               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z"/></svg>
-             </button>
-             <span class="font-bold text-red-700 text-sm">{{ link.downvotes }}</span>
-          </div>
-        </div>
-      </div>
-      <div v-if="links.length === 0" class="text-center text-gray-500 py-12 bg-white rounded-lg border-2 border-dashed border-gray-200">
-        No vacation homes added yet.<br>Be the first to add a link above!
-      </div>
+        </CardContent>
+      </Card>
+
+      <Card v-if="links.length === 0" class="border-dashed border-2">
+        <CardContent class="text-center text-muted-foreground py-12">
+          No vacation homes added yet.<br>Be the first to add a link above!
+        </CardContent>
+      </Card>
     </div>
   </div>
 </template>
